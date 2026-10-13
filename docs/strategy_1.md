@@ -9,7 +9,7 @@ Why not only one method: annotation misses proteins that have no UniProtKB entry
 | # | Stage | What | Notebook | Status |
 |---|---|---|---|---|
 | 1a | Annotation net, UniProtKB | Fungal proteins with an E3-binding (P) domain (PF02817, IPR004167, IPR036625) or the E2 / protein X family entry (IPR045257); lipoyl (L) and catalytic (C) entries are annotate-only, so architectures stay complete. (`Family_fetch.ipynb` is the wider variant: union over L, P, C and family entries, with optional Gene3D / SUPERFAMILY / PANTHER signatures) | `Family_fetch_strategy1.ipynb` | built; mock-tested, live fetch in progress |
-| 1b | Annotation net, UniParc | The same ID list against UniParc (`feature_id` search) for sequences without a UniProtKB entry (RefSeq-only, WGS, MAG). Keep only entries with no UniProtKB accession | `Family_fetch.ipynb` | **not built**; `feature_id` and taxonomy handling untested |
+| 1b | Annotation net, UniParc | The net IDs against UniParc (`feature_id:<ID> AND taxonomy_name:Fungi`) for sequences without a UniProtKB entry (RefSeq-only, WGS, MAG). Entries whose UniProtKB accession is already in the union are skipped; domain positions come from UniParc's match list | `Family_fetch_strategy1.ipynb` step 4b | built; mock-tested only. Checked on the live service: `taxonomy_name:Fungi` covers descendants (both example entries match), `organism_id:4751` matches only the exact taxon |
 | 2 | Inspect and curate | Architecture classes (L-P-C, L-P, L-C, ...), one FASTA per architecture, drop inclusions that do not belong, cluster, separate E2 / E3BP / OGDC-BCKDC | `Family_fetch.ipynb` step 5 files, `C_cluster_growth.ipynb` | step 5 files built; curation by hand |
 | 3 | Sequence net | Profiles / HMMs from the curated clusters searched against databases annotation cannot reach: `nr` restricted to fungi (includes WGS and MAG translations), optionally tblastn against fungal WGS contigs for genes never predicted | `B_query_to_tree.ipynb`, planned notebook D | not built; manual PSI-BLAST against `nr` first as a test |
 | 4 | Feedback | New hits: domain check, add to the database, rebuild profiles, repeat until a round adds nothing | all | not built |
@@ -35,9 +35,16 @@ Why not only one method: annotation misses proteins that have no UniProtKB entry
 
 Example of the gap in 1a: UPI001445F4C4 (*Daldinia childiae*, RefSeq XP_033438179, full Pfam PF00364 + PF02817 annotation) is a clear PX but has no UniProtKB entry. UPI0044A48F9C (*Peltula* sp. MAG, WGS KAI9786095) has only Gene3D and SUPERFAMILY matches.
 
+## CBD characterisation (planned, after stage 1b)
+
+The component-binding domain (CBD) is not a domain annotation of any database, so it is found through the PSBD hit and the sequence around it. `Family_fetch_strategy1.ipynb` writes `cbd_candidates.fasta`/`.tsv` (step 7): every protein in the classes `E3BP / protein X-like (L-P)` and `PSBD only` (parameter `CBD_CLASSES`; `P-C` can be added), UniProtKB and UniParc together, full length, with class, architecture, source and domain positions in the header. Once the UniParc fetch has been run live and checked:
+1. Cut out the CBD region (PSBD plus a flank, to be decided from the alignment).
+2. Align and cluster all potential CBDs.
+3. Build one or more fungal CBD HMMs from the clusters (compare with the general PF02817 HMM, see below).
+
 ## Open questions for the next design round
 
-1. Does UniParc `feature_id` accept Pfam, signature and InterPro IDs? Does `taxonomy_name`/`organism_id` include descendants of Fungi, or only the exact taxon?
+1. Does UniParc `feature_id` accept Pfam, signature and InterPro IDs on a full run? (Entries with Pfam, Gene3D and InterPro group IDs all exist in UniParc's match list; the query behaviour is untested.) Taxon handling: `taxonomy_name:Fungi` is lineage-based, `organism_id` is exact.
 2. How many fungal UniParc sequences without a UniProtKB accession carry these signatures?
 3. Sequence net: local `nr` fungal subset (download size) versus remote BLAST versus UniParc only.
 4. Cutoffs for adding a hit from stage 3: domain coverage, E-value, profile score margin versus the E2 profiles (the competitive scheme in notebook C).

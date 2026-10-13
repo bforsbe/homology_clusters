@@ -8,7 +8,7 @@ Why not only one method: annotation misses proteins that have no UniProtKB entry
 
 | # | Stage | What | Notebook | Status |
 |---|---|---|---|---|
-| 1a | Annotation net, UniProtKB | All fungal proteins with a lipoyl (L), E3-binding (P) or catalytic (C) domain, or a family entry: union of InterPro, Pfam, and Gene3D / SUPERFAMILY / PANTHER signatures | `Family_fetch.ipynb` | built; mock-tested, live fetch in progress |
+| 1a | Annotation net, UniProtKB | Fungal proteins with an E3-binding (P) domain (PF02817, IPR004167, IPR036625) or the E2 / protein X family entry (IPR045257); lipoyl (L) and catalytic (C) entries are annotate-only, so architectures stay complete. (`Family_fetch.ipynb` is the wider variant: union over L, P, C and family entries, with optional Gene3D / SUPERFAMILY / PANTHER signatures) | `Family_fetch_strategy1.ipynb` | built; mock-tested, live fetch in progress |
 | 1b | Annotation net, UniParc | The same ID list against UniParc (`feature_id` search) for sequences without a UniProtKB entry (RefSeq-only, WGS, MAG). Keep only entries with no UniProtKB accession | `Family_fetch.ipynb` | **not built**; `feature_id` and taxonomy handling untested |
 | 2 | Inspect and curate | Architecture classes (L-P-C, L-P, L-C, ...), one FASTA per architecture, drop inclusions that do not belong, cluster, separate E2 / E3BP / OGDC-BCKDC | `Family_fetch.ipynb` step 5 files, `C_cluster_growth.ipynb` | step 5 files built; curation by hand |
 | 3 | Sequence net | Profiles / HMMs from the curated clusters searched against databases annotation cannot reach: `nr` restricted to fungi (includes WGS and MAG translations), optionally tblastn against fungal WGS contigs for genes never predicted | `B_query_to_tree.ipynb`, planned notebook D | not built; manual PSI-BLAST against `nr` first as a test |
@@ -46,3 +46,7 @@ Example of the gap in 1a: UPI001445F4C4 (*Daldinia childiae*, RefSeq XP_03343817
 ## Files written by Family_fetch (stage 1a / 2)
 
 `proteins.fasta`, `proteins.tsv`, `domains.tsv`, `regions_L/P/C.fasta`, `query_log.tsv`, and `architectures/` (one FASTA per class and architecture, `rare.fasta` for architectures with fewer than `ARCH_MIN_SIZE` proteins, `architectures.tsv` with all architectures).
+
+## Profiles for stage 3
+
+No prefabricated HMM is restricted to fungi, so stage 3 should use two kinds: the general Pfam / InterPro HMMs (PF02817, PF00364, PF00198) as a first, unbiased pass, and fungal profiles built from the curated clusters of stage 2. The fungal profiles are tighter and tuned to the divergence actually seen in fungal PX / E3BP, which is the point of building them from the curated database; they are also the ones that can separate E2 from E3BP. Keep both: the general HMM finds what the fungal one is too narrow for, and the comparison shows how far the curated set has drifted from the general family.

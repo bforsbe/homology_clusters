@@ -27,3 +27,7 @@ Run A first (it needs internet access and, for UniRef50, about 10 GB of disk for
 
 ## License
 GPL-3.0, see `LICENSE`.
+
+## Strategy
+
+The overall plan (annotation net, curated database, sequence net) is in [docs/strategy_1.md](docs/strategy_1.md).

@@ -6,12 +6,13 @@ Colab/Jupyter notebooks for finding remote homologs of a protein region and sort
 |---|---|
 | `A_build_databases.ipynb` | Build standalone MMseqs2 databases with taxonomy (a taxonomic subset of UniRef, or from a FASTA). Run once. |
 | `B_query_to_tree.ipynb` | One query sequence: search, filter, cluster, align, tree. Optional stage 2 (class assignment in a second database). |
+| `Family_fetch.ipynb` | Collect all UniProt proteins carrying lipoyl / E3-binding / catalytic domain entries (InterPro and Pfam IDs, union over IDs and taxa), label domain architectures, write FASTA and region files, optionally build a small database for B and C. Needs internet. |
 | `C_cluster_growth.ipynb` | Several anchor sequences: controlled competitive cluster growth by iterated profile searches; contested sequences are held out. |
 
 All three are Colab forms (code cells collapsed) and also run in plain Jupyter. Each step has a text cell saying what it does, what to expect and which parameters matter. Results are checkpointed.
 
 ## Status
-Tested end to end only on small mock databases on Linux. Not yet run on real UniRef-scale data. Notebook B still contains Linux-only shell calls; A and C avoid them.
+Tested end to end only on small mock databases on Linux. Not yet run on real UniRef-scale data. Notebook B still contains Linux-only shell calls; A, C and Family_fetch avoid them. Family_fetch was tested only against a local mock of the InterPro API, not the live service.
 
 ## Setup on a Linux machine or cluster
 ```bash

@@ -32,3 +32,5 @@ GPL-3.0, see `LICENSE`.
 ## Strategy
 
 The overall plan (annotation net, curated database, sequence net) is in [docs/strategy_1.md](docs/strategy_1.md).
+
+For contributors (human or Claude Code): [docs/handoff.md](docs/handoff.md) records the aims, priorities and known traps.
